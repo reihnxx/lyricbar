@@ -2,7 +2,14 @@
 
 <h1 align="center">LyricBar</h1>
 
-<p align="center"><b>English</b> · <a href="README.id.md">Bahasa Indonesia</a></p>
+<p align="center"><b>English</b> · <a href="README.id.md">Bahasa Indonesia</a> · <a href="https://reihnxx.github.io/lyricbar/">Website</a></p>
+
+<p align="center">
+  <a href="https://github.com/reihnxx/lyricbar/releases/latest"><img src="https://img.shields.io/github/v/release/reihnxx/lyricbar?label=download&color=1ed760" alt="Latest release"></a>
+  <a href="https://github.com/reihnxx/lyricbar/releases"><img src="https://img.shields.io/github/downloads/reihnxx/lyricbar/total?color=1ed760" alt="Downloads"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/reihnxx/lyricbar?color=blue" alt="MIT license"></a>
+  <a href="https://reihnxx.github.io/lyricbar/"><img src="https://img.shields.io/badge/website-reihnxx.github.io%2Flyricbar-555" alt="Website"></a>
+</p>
 
 <p align="center">Synced lyrics from the <b>Spotify Web Player</b> — on your MacBook <b>Touch Bar</b>,<br>
 or in a small <b>floating window</b> on Windows, Linux and macOS.<br>
@@ -10,6 +17,9 @@ Free, no Spotify login or API keys, nothing to configure.</p>
 
 <p align="center"><img src="docs/images/touchbar-lyrics.png" alt="Lyrics on the MacBook Touch Bar"></p>
 <p align="center"><img src="docs/images/floating-lyrics.png" width="480" alt="Floating lyrics window"></p>
+
+Looking for **Spotify lyrics on the MacBook Touch Bar**, a **floating, always-on-top Spotify lyrics
+window**, or **synced lyrics for the Spotify Web Player** on Windows, Linux or macOS? That's LyricBar.
 
 <sub>Screenshots use placeholder text.</sub>
 

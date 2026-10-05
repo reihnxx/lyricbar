@@ -2,9 +2,37 @@
   "name": "lyricbar",
   "version": "0.2.0",
   "private": true,
-  "description": "Synced Spotify Web Player lyrics on your Touch Bar and other local displays.",
-  "type": "module",
+  "description": "Synced Spotify Web Player lyrics on the MacBook Touch Bar and in an always-on-top floating window (Windows, Linux, macOS).",
+  "keywords": [
+    "spotify",
+    "lyrics",
+    "spotify-lyrics",
+    "synced-lyrics",
+    "touch-bar",
+    "touchbar",
+    "macbook-pro",
+    "macos",
+    "floating-window",
+    "picture-in-picture",
+    "browser-extension",
+    "chrome-extension",
+    "lrc",
+    "lrclib",
+    "karaoke",
+    "windows",
+    "linux"
+  ],
+  "homepage": "https://reihnxx.github.io/lyricbar/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/reihnxx/lyricbar.git"
+  },
+  "bugs": {
+    "url": "https://github.com/reihnxx/lyricbar/issues"
+  },
+  "author": "reihnxx (https://github.com/reihnxx)",
   "license": "MIT",
+  "type": "module",
   "scripts": {
     "test": "node --test \"extension/test/*.test.js\"",
     "mock": "node scripts/mock-sender.mjs",

@@ -2,7 +2,14 @@
 
 <h1 align="center">LyricBar</h1>
 
-<p align="center"><a href="README.md">English</a> · <b>Bahasa Indonesia</b></p>
+<p align="center"><a href="README.md">English</a> · <b>Bahasa Indonesia</b> · <a href="https://reihnxx.github.io/lyricbar/id/">Website</a></p>
+
+<p align="center">
+  <a href="https://github.com/reihnxx/lyricbar/releases/latest"><img src="https://img.shields.io/github/v/release/reihnxx/lyricbar?label=download&color=1ed760" alt="Latest release"></a>
+  <a href="https://github.com/reihnxx/lyricbar/releases"><img src="https://img.shields.io/github/downloads/reihnxx/lyricbar/total?color=1ed760" alt="Downloads"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/reihnxx/lyricbar?color=blue" alt="MIT license"></a>
+  <a href="https://reihnxx.github.io/lyricbar/"><img src="https://img.shields.io/badge/website-reihnxx.github.io%2Flyricbar-555" alt="Website"></a>
+</p>
 
 <p align="center">Lirik tersinkron dari <b>Spotify Web Player</b> — tampil di <b>Touch Bar</b> MacBook,<br>
 atau di <b>jendela kecil melayang</b> di Windows, Linux, dan macOS.<br>
@@ -10,6 +17,10 @@ Gratis, tanpa login Spotify atau API key, tanpa perlu setting apa-apa.</p>
 
 <p align="center"><img src="docs/images/touchbar-lyrics.png" alt="Lirik di Touch Bar MacBook"></p>
 <p align="center"><img src="docs/images/floating-lyrics.png" width="480" alt="Jendela lirik melayang"></p>
+
+Mencari cara menampilkan **lirik Spotify di Touch Bar MacBook**, **lirik Spotify melayang yang
+selalu di atas (always on top)**, atau **lirik tersinkron untuk Spotify Web Player** di Windows,
+Linux, maupun macOS? Itulah LyricBar.
 
 <sub>Screenshot memakai teks contoh.</sub>
 
