@@ -12,6 +12,8 @@ const SITE = 'https://reihnxx.github.io/lyricbar/';
 const REPO = 'https://github.com/reihnxx/lyricbar';
 const DL = `${REPO}/releases/latest/download`;
 const VERSION = JSON.parse(readFileSync(join(ROOT, 'extension/manifest.json'), 'utf8')).version;
+// Search engine ownership verification (Google Search Console).
+const GOOGLE_SITE_VERIFICATION = 'P5PRGQxGa-rtQc_woiN5vgX30N2nVirq-xLn-i_b1-I';
 const INSTALL_CMD = 'curl -fsSL https://raw.githubusercontent.com/reihnxx/lyricbar/main/scripts/install-macos.sh | bash';
 
 const STRINGS = {
@@ -183,6 +185,7 @@ function page(lang) {
 <meta name="description" content="${esc(t.description)}">
 <meta name="keywords" content="${esc(t.keywords)}">
 <meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="google-site-verification" content="${GOOGLE_SITE_VERIFICATION}">
 <meta name="theme-color" content="#121212">
 <link rel="canonical" href="${url}">
 <link rel="alternate" hreflang="en" href="${SITE}">
