@@ -1,0 +1,16 @@
+{
+  "name": "lyricbar",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Synced Spotify Web Player lyrics on your Touch Bar and other local displays.",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test \"extension/test/*.test.js\"",
+    "mock": "node scripts/mock-sender.mjs",
+    "build:macos": "scripts/build-macos.sh"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LyricBar</title>
+  <style>
+    :root {
+      --bg: #ffffff; --fg: #16181d; --muted: #6b7280; --line: #e5e7eb;
+      --card: #f6f7f9; --accent: #1db954; --warn: #d97706; --bad: #dc2626;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #121417; --fg: #eceef1; --muted: #9aa1ab; --line: #2a2e35; --card: #1b1e23; }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; max-width: 520px; background: var(--bg); color: var(--fg);
+           font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+    main { padding: 14px 16px 16px; display: grid; gap: 14px; }
+    header { display: flex; align-items: center; gap: 8px; }
+    header img { width: 22px; height: 22px; }
+    header h1 { font-size: 15px; margin: 0; font-weight: 650; }
+    header span { margin-left: auto; color: var(--muted); font-size: 12px; }
+    .card { background: var(--card); border-radius: 10px; padding: 10px 12px; }
+    .track { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sub { color: var(--muted); font-size: 12px; }
+    .now { margin-top: 6px; font-size: 14px; min-height: 20px; }
+    .eps { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+    .eps li { display: flex; gap: 8px; align-items: center; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+    .dot.connected { background: var(--accent); }
+    .dot.connecting { background: var(--warn); }
+    h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 6px; font-weight: 600; }
+    label { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; }
+    label + label, .field + .field { margin-top: 10px; }
+    .field { display: grid; gap: 4px; }
+    input[type=number], textarea { width: 100%; font: inherit; color: var(--fg); background: var(--bg);
+           border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
+    textarea { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; resize: vertical; min-height: 48px; }
+    .hint { color: var(--muted); font-size: 11.5px; }
+    .saved { color: var(--accent); font-size: 12px; min-height: 16px; }
+    .song[hidden] { display: none; }
+    .row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .row + .row { margin-top: 8px; }
+    button { font: inherit; font-size: 12px; color: var(--fg); background: var(--card); border: 1px solid var(--line);
+             border-radius: 6px; padding: 5px 9px; cursor: pointer; }
+    button:hover { border-color: var(--muted); }
+    button:disabled { opacity: .45; cursor: default; }
+    .offset { font-variant-numeric: tabular-nums; min-width: 64px; text-align: center; font-weight: 600; }
+    .warn { color: var(--warn); }
+    button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+    button.primary:hover { filter: brightness(1.08); }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <img src="../icons/icon48.png" alt="">
+      <h1>LyricBar</h1>
+      <span id="version"></span>
+    </header>
+
+    <section class="card" aria-live="polite">
+      <div class="track" id="track">Nothing playing</div>
+      <div class="sub" id="meta">Open open.spotify.com and play something.</div>
+      <div class="now" id="line"></div>
+    </section>
+
+    <section>
+      <h2>Floating lyrics · Windows / Linux / macOS</h2>
+      <div class="row">
+        <button id="float" class="primary">Show floating lyrics</button>
+        <button id="float-window">Open in a window</button>
+      </div>
+      <p class="hint" id="float-hint" style="margin:6px 0 0">Tip: in Spotify's player bar (bottom right, next to <b>Lyrics</b>) click the <b>LyricBar</b> button — the lyrics float above every window.</p>
+    </section>
+
+    <section class="song" id="song" hidden>
+      <h2>This song</h2>
+      <div class="row">
+        <button id="later" title="Lyrics appear too early">◀ 0.5 s later</button>
+        <span class="offset" id="offset">±0.0 s</span>
+        <button id="earlier" title="Lyrics appear too late">0.5 s earlier ▶</button>
+        <button id="reset">Reset</button>
+      </div>
+      <div class="row">
+        <button id="next-match">Wrong lyrics? Try next match</button>
+        <button id="toggle-hidden">Hide lyrics</button>
+        <button id="retry">Search again</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Displays</h2>
+      <ul class="eps" id="endpoints"></ul>
+    </section>
+
+    <section>
+      <h2>Settings</h2>
+      <label>
+        <input type="checkbox" id="spotifyProvider">
+        <span>Use Spotify's own lyrics when available <span class="hint">(experimental — reuses the lyrics the Web Player already loads for its Now Playing view; falls back to LRCLIB)</span></span>
+      </label>
+      <div class="field" style="margin-top:10px">
+        <span>Global timing offset (ms)</span>
+        <input type="number" id="offsetMs" step="100" min="-5000" max="5000">
+        <span class="hint">Applies to every song; positive shows lyrics earlier. Use “This song” above for one-off fixes (remembered per song).</span>
+      </div>
+      <div class="field">
+        <span>Display endpoints (one per line)</span>
+        <textarea id="endpoints-input" rows="2" spellcheck="false"></textarea>
+      </div>
+      <div class="saved" id="saved"></div>
+    </section>
+  </main>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
