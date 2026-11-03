@@ -123,3 +123,23 @@ test('network failure reports an error, then retry recovers', async () => {
   assert.equal(lastOf('track').error, null);
   assert.equal(lastOf('track').source, 'lrclib');
 });
+
+test('a second, paused Spotify tab cannot replace or clear the playing one', async () => {
+  lrclibMode = 'ok';
+  play('Placeholder Song');
+  await settle();
+  const msgListeners = [];
+  const other = { name: 'spotify-tab', onMessage: { addListener: (f) => msgListeners.push(f) }, onDisconnect: { addListener() {} } };
+  listeners.connect[0](other);
+  const emit = (m) => msgListeners.forEach((f) => f(m));
+  const paused = { key: 'Idle Song|Mock Artist|120', title: 'Idle Song', artist: 'Mock Artist', primaryArtist: 'Mock Artist', album: '', durationMs: 120000, artUrl: '' };
+  emit({ type: 'playback', track: paused, state: { isPlaying: false, positionMs: 0, ts: Date.now() } });
+  emit({ type: 'playback', track: null });
+  await settle();
+  assert.equal(lastOf('track').title, 'Placeholder Song');
+  assert.notEqual(frontend().sent.at(-1).type, 'clear');
+  // ...but once it starts playing, it takes over.
+  emit({ type: 'playback', track: paused, state: { isPlaying: true, positionMs: 0, ts: Date.now() } });
+  await settle();
+  assert.equal(lastOf('track').title, 'Idle Song');
+});

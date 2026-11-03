@@ -187,6 +187,16 @@ function clearAll() {
   broadcast({ type: 'clear' });
 }
 
+/**
+ * Several open.spotify.com tabs may report at once (only one actually plays).
+ * The tab that is playing owns the display; a paused or idle tab must not
+ * replace its song or clear it. A tab that starts playing takes over.
+ */
+function acceptsFrom(port, msg) {
+  if (!ownerPort || port === ownerPort) return true;
+  return Boolean(msg.track && msg.state?.isPlaying);
+}
+
 function onPlayback(msg) {
   if (!msg.track) return clearAll();
   if (!track || msg.track.key !== track.key) setTrack(msg.track);
@@ -270,9 +280,13 @@ chrome.runtime.onConnect.addListener((port) => {
   if (port.name !== 'spotify-tab') return;
   hub.wake();
   port.onMessage.addListener((msg) => {
-    ownerPort = port;
-    if (msg.type === 'playback') onPlayback(msg);
-    else if (msg.type === 'spotify-lyrics') onSpotifyLyrics(msg);
+    if (msg.type === 'playback') {
+      if (!acceptsFrom(port, msg)) return;
+      ownerPort = port;
+      onPlayback(msg);
+    } else if (msg.type === 'spotify-lyrics' && port === ownerPort) {
+      onSpotifyLyrics(msg);
+    }
   });
   port.onDisconnect.addListener(() => {
     if (port === ownerPort) {
