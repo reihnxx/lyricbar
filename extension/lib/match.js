@@ -22,15 +22,21 @@ export function normalize(text) {
     .trim();
 }
 
-/** 0..1 similarity: 1 for equal/contained strings, else word-overlap (Dice). */
+/**
+ * 0..1 similarity: 1 for equal strings, 0.9 when one is the other plus a few
+ * whole words ("The Example Band" / "Example Band"), else word-overlap (Dice).
+ * A short title inside a much longer one ("Stay" / "Stay With Me") is a
+ * different song, so it only gets the Dice score.
+ */
 export function similarity(a, b) {
   const x = normalize(a);
   const y = normalize(b);
   if (!x || !y) return 0;
   if (x === y) return 1;
-  if ((x.length >= 4 && y.includes(x)) || (y.length >= 4 && x.includes(y))) return 0.9;
   const wx = new Set(x.split(' '));
   const wy = new Set(y.split(' '));
+  const [short, long, ws, wl] = x.length <= y.length ? [x, y, wx, wy] : [y, x, wy, wx];
+  if (short.length >= 4 && ` ${long} `.includes(` ${short} `) && ws.size >= wl.size * 0.6) return 0.9;
   let common = 0;
   for (const w of wx) if (wy.has(w)) common++;
   return (2 * common) / (wx.size + wy.size);
@@ -61,7 +67,7 @@ export function scoreRecord(track, record) {
     ...splitArtists(record.artistName).flatMap((ra) => artists.map((a) => similarity(a, ra))),
   );
   const durDiff = track.durationMs && record.duration ? Math.abs(record.duration - track.durationMs / 1000) : null;
-  const ok = titleSim >= 0.5 && artistSim >= 0.6 && (durDiff === null || durDiff <= MAX_DURATION_DIFF_S);
+  const ok = titleSim >= 0.6 && artistSim >= 0.6 && (durDiff === null || durDiff <= MAX_DURATION_DIFF_S);
   const score = titleSim * 2 + artistSim + (record.syncedLyrics ? 0.5 : 0) - (durDiff === null ? 0.3 : Math.min(durDiff, 10) * 0.1);
   return { ok, score };
 }

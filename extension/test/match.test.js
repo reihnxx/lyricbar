@@ -15,6 +15,12 @@ test('similarity: equal, contained, partial, unrelated', () => {
   assert.equal(similarity('Alpha', 'Omega'), 0);
 });
 
+test('similarity: a short title inside a longer one is a different song', () => {
+  assert.ok(similarity('Stay', 'Stay With Me') < 0.6);
+  assert.ok(similarity('Love', 'Love Me Do') < 0.6);
+  assert.ok(similarity('Hello', 'Say Hello To Goodbye') < 0.6);
+});
+
 test('splitArtists handles common separators', () => {
   assert.deepEqual(splitArtists('A, B & C feat. D'), ['A', 'B', 'C', 'D']);
 });
@@ -25,6 +31,7 @@ test('scoreRecord accepts the same song, rejects others', () => {
   assert.equal(scoreRecord(track, { trackName: 'Placeholder Song', artistName: 'Guest', duration: 200 }).ok, true);
   assert.equal(scoreRecord(track, { trackName: 'Placeholder Song', artistName: 'Some Band', duration: 230 }).ok, false);
   assert.equal(scoreRecord(track, { trackName: 'Placeholder Song', artistName: 'Unrelated Choir', duration: 200 }).ok, false);
+  assert.equal(scoreRecord({ ...track, title: 'Stay' }, { trackName: 'Stay With Me', artistName: 'Some Band', duration: 200 }).ok, false);
   assert.equal(scoreRecord(track, { trackName: 'Different Words', artistName: 'Some Band', duration: 200 }).ok, false);
 });
 

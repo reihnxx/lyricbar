@@ -34,7 +34,8 @@ let lrclibMode = 'ok';
 globalThis.fetch = async (url) => {
   if (lrclibMode === 'down') throw new TypeError('fetch failed');
   const u = new URL(url);
-  const rec = (id, words) => ({ id, trackName: 'Placeholder Song', artistName: 'Mock Artist', duration: 120, syncedLyrics: `[00:01.00]${words}\n[00:03.00]${words} two` });
+  const asked = u.searchParams.get('track_name') ?? 'Placeholder Song';
+  const rec = (id, words) => ({ id, trackName: asked, artistName: 'Mock Artist', duration: 120, syncedLyrics: `[00:01.00]${words}\n[00:03.00]${words} two` });
   if (u.pathname === '/api/get') return { ok: false, status: 404 };
   return { ok: true, status: 200, json: async () => (lrclibMode === 'none' ? [] : [rec(1, 'first take'), rec(2, 'second take')]) };
 };

@@ -6,6 +6,8 @@
   const POLL_MS = 250;
   const RESYNC_MS = 10000; // also keeps the service worker alive
   const SEEK_TOLERANCE_MS = 1200;
+  const DURATION_TOLERANCE_MS = 1500; // progress-bar max vs the duration label
+  const METADATA_GRACE_MS = 2000; // how long to wait for mediaSession / duration to catch up
   const MOVING_WINDOW_MS = 1600; // the bar updates every ~1000ms while playing
   const PLAYING_LABEL = /pause|jeda|pausa|一時停止|暂停|暫停|일시정지|пауза/i;
   const PAUSED_LABEL = /play|putar|reproduc|lecture|abspielen|wiedergabe|riproduci|再生|播放|재생|воспроизв/i;
@@ -63,21 +65,44 @@
     onBarMutation();
   }
 
+  const UNSETTLED = Symbol('unsettled');
+  let staleTitle = null;
+  let staleSince = 0;
+  const same = (a, b) => (a || '').trim().toLowerCase() === (b || '').trim().toLowerCase();
+
+  /**
+   * What is playing, from the player DOM. mediaSession metadata (album, art)
+   * and the progress bar's duration update a beat after the title, so they are
+   * only used once they agree with it; until then UNSETTLED means "look again"
+   * rather than reporting the new title with the previous song's details.
+   * If they never agree, the DOM alone is used after a short grace period.
+   */
   function readTrack() {
     const md = navigator.mediaSession?.metadata;
     const title = ($(S.title)?.textContent || md?.title || '').trim();
     if (!title) return null;
+    const mdFresh = Boolean(md) && same(md.title, title);
+    const maxMs = Number($(S.progressInput)?.max) || 0;
+    const clockMs = parseClock($(S.duration)?.textContent) || 0;
+    const durationAgrees = !maxMs || !clockMs || Math.abs(maxMs - clockMs) <= DURATION_TOLERANCE_MS;
+    if ((md && !mdFresh) || !durationAgrees) {
+      if (staleTitle !== title) {
+        staleTitle = title;
+        staleSince = Date.now();
+      }
+      if (Date.now() - staleSince < METADATA_GRACE_MS) return UNSETTLED;
+    }
     const domArtists = [...new Set([...document.querySelectorAll(S.artist)].map((e) => e.textContent.trim()))].filter(Boolean);
-    const artist = (md?.artist || domArtists.join(', ')).trim();
-    const durationMs = Number($(S.progressInput)?.max) || parseClock($(S.duration)?.textContent) || 0;
+    const artist = ((mdFresh && md.artist) || domArtists.join(', ')).trim();
+    const durationMs = durationAgrees ? maxMs || clockMs : clockMs;
     return {
       key: `${title}␟${artist}␟${Math.round(durationMs / 1000)}`,
       title,
       artist,
       primaryArtist: domArtists[0] || artist.split(',')[0].trim(),
-      album: (md?.album || '').trim(),
+      album: mdFresh ? (md.album || '').trim() : '',
       durationMs,
-      artUrl: md?.artwork?.[0]?.src || '',
+      artUrl: mdFresh ? md.artwork?.[0]?.src || '' : '',
     };
   }
 
@@ -120,6 +145,7 @@
     watchBar();
 
     const track = readTrack();
+    if (track === UNSETTLED) return;
     if (!track) {
       if (sentTrackKey && !missingSince) missingSince = now;
       if (sentTrackKey && now - missingSince > 2000) {
@@ -134,6 +160,7 @@
     if (track.key !== sentTrackKey) {
       if (pendingKey !== track.key) {
         pendingKey = track.key;
+        barSample = null; // still describes the previous song
         return;
       }
     }
