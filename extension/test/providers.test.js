@@ -78,6 +78,15 @@ test('multiple candidates are returned synced-first for "try next match"', async
   assert.deepEqual(options.map((o) => o.key), ['lrclib:3', 'lrclib:2', 'lrclib:1']);
 });
 
+test('same title but a different edit length is offered only when nothing fits exactly', async () => {
+  const off = (id, duration) => rec(id, { duration, syncedLyrics: '[00:01.00]x' });
+  const fetch = mockFetch({ '/api/search': () => [off(1, 208), off(2, 213), off(3, 260), rec(4, { trackName: 'Placeholder Song Two', duration: 208, syncedLyrics: '[00:01.00]y' })] });
+  const options = await findLrclibOptions({ ...TRACK, album: '' }, { fetch });
+  assert.deepEqual(options.map((o) => o.key), ['lrclib:1', 'lrclib:2']);
+  const exact = mockFetch({ '/api/search': () => [off(1, 208), off(5, 200)] });
+  assert.deepEqual((await findLrclibOptions({ ...TRACK, album: '' }, { fetch: exact })).map((o) => o.key), ['lrclib:5']);
+});
+
 test('fetchLrclib returns null when nothing matches and throws on server errors', async () => {
   assert.equal(await fetchLrclib(TRACK, { fetch: mockFetch({ '/api/search': () => [] }) }), null);
   const broken = async () => ({ ok: false, status: 500 });

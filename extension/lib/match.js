@@ -51,12 +51,14 @@ export function splitArtists(artist) {
 }
 
 export const MAX_DURATION_DIFF_S = 4;
+/** Same song, different edit/release: lyrics likely right but timing may be shifted. */
+export const NEAR_DURATION_DIFF_S = 15;
 
 /**
  * Score an LRCLIB record against the playing track.
  * @param {{title:string, artist:string, durationMs:number}} track
  * @param {{trackName?:string, artistName?:string, duration?:number, syncedLyrics?:string}} record
- * @returns {{ok:boolean, score:number}}
+ * @returns {{ok:boolean, near:boolean, score:number}}
  */
 export function scoreRecord(track, record) {
   const titleSim = similarity(track.title, record.trackName);
@@ -68,6 +70,7 @@ export function scoreRecord(track, record) {
   );
   const durDiff = track.durationMs && record.duration ? Math.abs(record.duration - track.durationMs / 1000) : null;
   const ok = titleSim >= 0.6 && artistSim >= 0.6 && (durDiff === null || durDiff <= MAX_DURATION_DIFF_S);
+  const near = !ok && titleSim === 1 && artistSim >= 0.6 && durDiff !== null && durDiff <= NEAR_DURATION_DIFF_S;
   const score = titleSim * 2 + artistSim + (record.syncedLyrics ? 0.5 : 0) - (durDiff === null ? 0.3 : Math.min(durDiff, 10) * 0.1);
-  return { ok, score };
+  return { ok, near, score };
 }

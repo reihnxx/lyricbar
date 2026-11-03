@@ -85,7 +85,8 @@
     const maxMs = Number($(S.progressInput)?.max) || 0;
     const clockMs = parseClock($(S.duration)?.textContent) || 0;
     const durationAgrees = !maxMs || !clockMs || Math.abs(maxMs - clockMs) <= DURATION_TOLERANCE_MS;
-    if ((md && !mdFresh) || !durationAgrees) {
+    // Without a duration the lookup can't tell apart songs sharing a title.
+    if ((md && !mdFresh) || !durationAgrees || !(maxMs || clockMs)) {
       if (staleTitle !== title) {
         staleTitle = title;
         staleSince = Date.now();

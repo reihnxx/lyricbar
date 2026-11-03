@@ -32,6 +32,10 @@ test('scoreRecord accepts the same song, rejects others', () => {
   assert.equal(scoreRecord(track, { trackName: 'Placeholder Song', artistName: 'Some Band', duration: 230 }).ok, false);
   assert.equal(scoreRecord(track, { trackName: 'Placeholder Song', artistName: 'Unrelated Choir', duration: 200 }).ok, false);
   assert.equal(scoreRecord({ ...track, title: 'Stay' }, { trackName: 'Stay With Me', artistName: 'Some Band', duration: 200 }).ok, false);
+  const off = scoreRecord(track, { trackName: 'Placeholder Song', artistName: 'Some Band', duration: 210 });
+  assert.deepEqual([off.ok, off.near], [false, true]);
+  assert.equal(scoreRecord(track, { trackName: 'Placeholder Song', artistName: 'Some Band', duration: 260 }).near, false);
+  assert.equal(scoreRecord({ ...track, title: 'Stay' }, { trackName: 'Stay With Me', artistName: 'Some Band', duration: 210 }).near, false);
   assert.equal(scoreRecord(track, { trackName: 'Different Words', artistName: 'Some Band', duration: 200 }).ok, false);
 });
 

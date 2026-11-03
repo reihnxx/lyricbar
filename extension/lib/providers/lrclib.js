@@ -39,6 +39,15 @@ export function rankRecords(track, records) {
     .map((x) => x.r);
 }
 
+/** Records that are this song but whose length is a bit off (other edit/release). */
+export function nearRecords(track, records) {
+  return (records || [])
+    .map((r) => ({ r, ...scoreRecord(track, r) }))
+    .filter((x) => x.near && (x.r.syncedLyrics || x.r.plainLyrics))
+    .sort((a, b) => b.score - a.score)
+    .map((x) => x.r);
+}
+
 /**
  * Find every plausible lyrics option for a track, best first.
  * @param {{title:string, artist:string, primaryArtist?:string, album?:string, durationMs:number}} track
@@ -86,11 +95,17 @@ export async function findLrclibOptions(track, opts = {}) {
     ...(clean !== track.title ? [{ track_name: clean, artist_name: artist }] : []),
     { q: `${clean} ${artist}` },
   ];
+  const nearby = [];
   for (const params of searches) {
     const hasSynced = records.some((r) => r.syncedLyrics || r.instrumental);
     if (hasSynced) break;
-    add(rankRecords(track, (await get('search', params)) ?? []));
+    const found = (await get('search', params)) ?? [];
+    add(rankRecords(track, found));
+    nearby.push(...nearRecords(track, found));
   }
+  // Nothing matches the exact length: offer same-title records of a slightly
+  // different length (the user can nudge timing or cycle matches).
+  if (!records.length) add(nearby.slice(0, MAX_CANDIDATES));
 
   const options = [];
   for (const record of records) {
